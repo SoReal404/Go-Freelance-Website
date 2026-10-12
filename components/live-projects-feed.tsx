@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import {
   Search,
   ExternalLink,
@@ -59,6 +59,15 @@ function newestFirst(projects: LiveProject[], now: number): LiveProject[] {
   return [...projects].sort((a, b) => (projectTimestamp(b, now) ?? 0) - (projectTimestamp(a, now) ?? 0))
 }
 
+function safeProjectUrl(value: string): string | undefined {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' ? url.toString() : undefined
+  } catch {
+    return undefined
+  }
+}
+
 const PLATFORM_COLORS: Record<string, { bg: string; text: string; border: string; glow: string; name: string }> = {
   freelancer: {
     bg: 'bg-[#29B2FE]/15',
@@ -102,13 +111,7 @@ const PLATFORM_COLORS: Record<string, { bg: string; text: string; border: string
     glow: 'hover:shadow-[0_0_30px_rgba(34,197,94,0.18)]',
     name: 'FreelanceArabs',
   },
-  upwork: {
-    bg: 'bg-[#14A800]/15',
-    text: 'text-[#14A800]',
-    border: 'border-[#14A800]/30 hover:border-[#14A800]/70',
-    glow: 'hover:shadow-[0_0_30px_rgba(20,168,0,0.18)]',
-    name: 'Upwork',
-  },
+
 }
 
 function getPlatformMeta(platform: string) {
@@ -178,6 +181,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
   const [page, setPage] = useState(1)
   const [now, setNow] = useState(() => Date.now())
   const [newProjectIds, setNewProjectIds] = useState<Set<string>>(() => new Set())
+  const realtimeProjectIds = useRef(new Set<string>())
   const [selectedProject, setSelectedProject] = useState<LiveProject | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -240,7 +244,13 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
       if (data.length < batchSize) break
     }
 
-    setProjects(newestFirst(allProjects, Date.now()))
+    setProjects((previous) => {
+      const fetchedIds = new Set(allProjects.map((project) => project.id))
+      const receivedDuringFetch = previous.filter(
+        (project) => realtimeProjectIds.current.has(project.id) && !fetchedIds.has(project.id),
+      )
+      return newestFirst([...allProjects, ...receivedDuringFetch], Date.now())
+    })
     setLoading(false)
   }
 
@@ -255,6 +265,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
         { event: 'INSERT', schema: 'public', table: 'projects' },
         (payload) => {
           const project = payload.new as LiveProject
+          realtimeProjectIds.current.add(project.id)
           setProjects((prev) => newestFirst([project, ...prev.filter((item) => item.id !== project.id)], Date.now()))
           setNewProjectIds((prev) => new Set(prev).add(project.id))
           setPage(1)
@@ -384,7 +395,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
       ? currentIds.filter((id) => id !== project.id)
       : [...currentIds, project.id]
     const { error: saveError } = await supabase.auth.updateUser({
-      data: { ...data.user.user_metadata, saved_project_ids: nextIds },
+      data: { saved_project_ids: nextIds },
     })
 
     if (saveError) {
@@ -503,7 +514,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
       {/* Stats bar */}
       <div className="mt-4 flex items-center justify-between px-1 text-xs text-white/40">
         <p>
-          Showing <span className="font-medium text-white/80">{filteredProjects.length}</span> live projects
+          {savedOnly ? 'Saved projects' : 'Showing'} <span className="font-medium text-white/80">{filteredProjects.length}</span> {savedOnly ? 'bookmarked jobs' : 'live projects'}
           {search ? ` matching "${search}"` : ''}
         </p>
         <div className="flex items-center gap-2">
@@ -514,6 +525,16 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
 
       {loadError && <p role="alert" className="mt-4 text-sm text-red-300">{loadError}</p>}
       {bookmarkError && <p role="alert" className="mt-3 text-sm text-red-300">{bookmarkError}</p>}
+      {savedOnly && (
+        <section aria-label="Your bookmarked projects" className="mt-4 rounded-xl border border-[#6e80ff]/20 bg-[#2541FF]/[.06] px-4 py-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-[#c2caff]">
+            <Bookmark className="size-3.5 fill-current" />
+            Your saved jobs
+            <span className="text-white/40">· {filteredProjects.length}</span>
+          </div>
+          <p className="mt-1 text-[11px] text-white/40">Bookmarks are saved to your account and stay available when you come back.</p>
+        </section>
+      )}
 
       {recommendedProjects.length > 0 && (
         <section className="mt-7" aria-labelledby="recommended-projects-heading">
@@ -528,7 +549,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
             {recommendedProjects.map(({ project, matchedSkills }) => (
               <a
                 key={project.id}
-                href={project.url}
+                href={safeProjectUrl(project.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-64 shrink-0 rounded-xl border border-[#6e80ff]/20 bg-[#0a0c16]/80 p-3 transition hover:border-[#6e80ff]/50 hover:bg-[#11152a]"
@@ -562,9 +583,9 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="mt-12 rounded-2xl border border-white/10 bg-white/[.015] p-12 text-center">
-          <Search className="mx-auto size-8 text-white/20" />
-          <h3 className="mt-4 text-base font-medium text-white/80">No projects found</h3>
-          <p className="mt-1 text-xs text-white/40">Try adjusting your search terms or platform filters.</p>
+          {savedOnly ? <Bookmark className="mx-auto size-8 text-white/20" /> : <Search className="mx-auto size-8 text-white/20" />}
+          <h3 className="mt-4 text-base font-medium text-white/80">{savedOnly ? 'No bookmarked projects yet' : 'No projects found'}</h3>
+          <p className="mt-1 text-xs text-white/40">{savedOnly ? 'Bookmark a project to keep it here for later.' : 'Try adjusting your search terms or platform filters.'}</p>
           {(search || selectedPlatform !== 'all' || skillsOnly || savedOnly) && (
             <Button
               variant="outline"
@@ -596,7 +617,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
             return (
               <div
                 key={project.id}
-                className={`group relative flex flex-col justify-between rounded-2xl border bg-[#0a0c16]/90 p-5 transition-all duration-300 ${meta.border} ${meta.glow} ${newProjectIds.has(project.id) ? 'project-enter' : ''}`}
+                className={`group relative flex flex-col justify-between rounded-2xl border bg-[#0a0c16]/90 p-5 transition-all duration-300 hover:z-20 hover:scale-[1.035] hover:shadow-[0_18px_50px_rgba(37,65,255,.2)] focus-within:z-20 focus-within:scale-[1.02] focus-within:shadow-[0_18px_50px_rgba(37,65,255,.2)] ${meta.border} ${meta.glow} ${newProjectIds.has(project.id) ? 'project-enter' : ''}`}
               >
                 <div>
                   {/* Top Bar */}
@@ -619,37 +640,35 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
                   </div>
 
                   {/* Title */}
-                  <h3 className="mt-3 line-clamp-2 text-base font-medium leading-snug text-white group-hover:text-white">
+                  <h3 className="mt-3 line-clamp-2 text-base font-medium leading-snug text-white group-hover:line-clamp-none group-focus-within:line-clamp-none">
                     {highlightMatches(project.title, search)}
                   </h3>
 
                   {/* Description snippet */}
-                  <p className="mt-2.5 line-clamp-3 text-xs leading-relaxed text-white/50">
+                  <p className="mt-2.5 line-clamp-3 text-xs leading-relaxed text-white/50 group-hover:line-clamp-none group-focus-within:line-clamp-none">
                     {highlightMatches(project.description || project.listing_desc || 'No description provided.', search)}
                   </p>
 
                   {/* Skills tags */}
                   {project.skills && project.skills.length > 0 && (
                     <div className="mt-4 flex flex-wrap gap-1.5" title={project.skills.join(', ')} aria-label={`All skills: ${project.skills.join(', ')}`}>
-                      {project.skills.slice(0, 4).map((skill) => {
+                      {project.skills.map((skill, index) => {
                         const isMatch = normalizedUserSkills.some(
                           (uk) => skill.toLowerCase().includes(uk) || uk.includes(skill.toLowerCase()),
                         )
                         return (
                           <span
                             key={skill}
-                            className={`rounded-md px-2 py-1 text-[11px] transition ${
-                              isMatch
-                                ? 'bg-[#2541FF]/30 font-medium text-[#b5c5ff]'
-                                : 'bg-white/[.05] text-white/60'
-                            }`}
+                            className={`inline-block rounded-md px-2 py-1 text-[11px] transition-all duration-300 ${
+                              index >= 4 ? 'max-h-0 scale-95 overflow-hidden p-0 opacity-0 group-hover:max-h-40 group-hover:scale-100 group-hover:px-2 group-hover:py-1 group-hover:opacity-100 group-focus-within:max-h-40 group-focus-within:scale-100 group-focus-within:px-2 group-focus-within:py-1 group-focus-within:opacity-100' : ''
+                            } ${isMatch ? 'bg-[#2541FF]/30 font-medium text-[#b5c5ff]' : 'bg-white/[.05] text-white/60'}`}
                           >
                             {highlightMatches(skill, search)}
                           </span>
                         )
                       })}
                       {project.skills.length > 4 && (
-                        <span className="rounded-md bg-white/[.04] px-1.5 py-1 text-[10px] text-white/35">
+                        <span className="rounded-md bg-white/[.04] px-1.5 py-1 text-[10px] text-white/35 group-hover:hidden group-focus-within:hidden">
                           +{project.skills.length - 4}
                         </span>
                       )}
@@ -681,7 +700,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
                       <Bookmark className={`size-3.5 ${savedProjectIds.includes(project.id) ? 'fill-current' : ''}`} />
                     </button>
                     <a
-                      href={project.url}
+                      href={safeProjectUrl(project.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[.03] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:border-white/30 hover:bg-white/[.08] hover:text-white"
