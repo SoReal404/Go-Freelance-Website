@@ -43,7 +43,41 @@ function Shell({ children, onNavigate }: { children: React.ReactNode; onNavigate
     return () => { mounted = false }
   }, [supabase])
   const signOut = async () => { await supabase.auth.signOut(); window.location.assign('/') }
-  return <div className="min-h-screen bg-[#05050a] text-white"><div className="pointer-events-none fixed inset-0 overflow-hidden"><div className="aurora aurora-one"/><div className="aurora aurora-two"/></div><header className="relative z-20 flex h-20 items-center justify-between border-b border-white/[.07] px-5 md:px-10"><button onClick={() => onNavigate('landing')} aria-label="GO Freelance home"><Logo /></button><nav className="hidden items-center gap-7 text-sm text-white/55 md:flex"><button onClick={() => onNavigate('dashboard')} className="hover:text-white">Dashboard</button><button onClick={() => onNavigate('bid')} className="hover:text-white">AI Bid Maker</button><button onClick={() => onNavigate('pricing')} className="hover:text-white">Pricing</button></nav><div className="flex items-center gap-3">{identity ? <button onClick={() => onNavigate('profile')} className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm text-white/70 hover:border-white/25 md:flex"><span className="grid size-6 place-items-center rounded-full bg-[#25336e] text-[10px]">{identity.initials}</span> {identity.label}</button> : <button onClick={() => onNavigate('login')} className="hidden text-sm text-white/55 hover:text-white md:block">Sign in</button>}{identity && <button onClick={signOut} className="hidden text-sm text-white/45 hover:text-white md:block">Sign out</button>}<Button onClick={() => onNavigate(identity ? 'dashboard' : 'signup')} className="bg-[#2541FF] text-white hover:bg-[#3651ff]">{identity ? 'Open dashboard' : 'Create account'} <ArrowRight data-icon="inline-end" /></Button></div></header><main className="relative z-10">{children}</main></div>
+  return (
+    <div className="flex min-h-screen flex-col bg-[#05050a] text-white">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="aurora aurora-one"/>
+        <div className="aurora aurora-two"/>
+      </div>
+      <header className="relative z-20 flex h-20 items-center justify-between border-b border-white/[.07] px-5 md:px-10">
+        <button onClick={() => onNavigate('landing')} aria-label="GO Freelance home"><Logo /></button>
+        <nav className="hidden items-center gap-7 text-sm text-white/55 md:flex">
+          <button onClick={() => onNavigate('dashboard')} className="hover:text-white">Dashboard</button>
+          <button onClick={() => onNavigate('bid')} className="hover:text-white">AI Bid Maker</button>
+          <button onClick={() => onNavigate('pricing')} className="hover:text-white">Pricing</button>
+        </nav>
+        <div className="flex items-center gap-3">
+          {identity ? <button onClick={() => onNavigate('profile')} className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm text-white/70 hover:border-white/25 md:flex"><span className="grid size-6 place-items-center rounded-full bg-[#25336e] text-[10px]">{identity.initials}</span> {identity.label}</button> : <button onClick={() => onNavigate('login')} className="hidden text-sm text-white/55 hover:text-white md:block">Sign in</button>}
+          {identity && <button onClick={signOut} className="hidden text-sm text-white/45 hover:text-white md:block">Sign out</button>}
+          <Button onClick={() => onNavigate(identity ? 'dashboard' : 'signup')} className="bg-[#2541FF] text-white hover:bg-[#3651ff]">{identity ? 'Open dashboard' : 'Create account'} <ArrowRight data-icon="inline-end" /></Button>
+        </div>
+      </header>
+      <main className="relative z-10 flex-1">{children}</main>
+      <footer className="relative z-10 mt-auto border-t border-white/[.07] px-5 py-6 md:px-10">
+        <div className="mx-auto flex max-w-7xl justify-end">
+          <a
+            href="https://www.linkedin.com/in/marwanmost/?isSelfProfile=true"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-white/55 transition hover:text-white"
+          >
+            <span aria-hidden="true" className="grid size-5 place-items-center rounded bg-[#0A66C2] text-xs font-bold text-white">in</span>
+            <span>LinkedIn</span>
+          </a>
+        </div>
+      </footer>
+    </div>
+  )
 }
 function Landing({ onNavigate }: { onNavigate: (p: string) => void }) {
   return <Shell onNavigate={onNavigate}><section className="mx-auto max-w-7xl px-5 pb-20 pt-20 md:px-10 md:pt-28"><div className="mx-auto max-w-4xl text-center"><div className="reveal mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-[#5268ff]/30 bg-[#1b255d]/30 px-4 py-2 text-xs text-[#aeb8ff]"><span className="size-1.5 rounded-full bg-[#6e80ff] shadow-[0_0_10px_#6e80ff]"/>Live freelance intelligence, finally in one place</div><h1 className="reveal reveal-delay-1 text-balance text-5xl font-semibold leading-[1.02] tracking-[-.06em] md:text-8xl">Your next great<br/><span className="text-gradient">freelance project</span><br/>is already live.</h1><p className="reveal reveal-delay-2 mx-auto mt-7 max-w-xl text-base leading-7 text-white/50 md:text-lg">GO Freelance watches the platforms you care about and brings the right opportunities to you — before everyone else sees them.</p><div className="reveal reveal-delay-3 mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Button onClick={() => onNavigate('signup')} size="lg" className="h-12 bg-[#2541FF] px-6 text-white shadow-[0_0_35px_rgba(37,65,255,.3)] hover:bg-[#3651ff]">Start for free <ArrowRight data-icon="inline-end" /></Button><Button onClick={() => onNavigate('dashboard')} size="lg" variant="outline" className="h-12 border-white/15 bg-white/[.03] px-6 text-white hover:bg-white/[.08]">Preview dashboard</Button></div></div><div className="reveal reveal-delay-3 relative mx-auto mt-20 max-w-5xl rounded-2xl border border-white/10 bg-[#0b0d18]/90 p-2 shadow-[0_30px_100px_rgba(37,65,255,.18)]"><div className="rounded-xl border border-white/[.06] bg-[#080a12] p-4 md:p-6"><div className="mb-5 flex items-center justify-between"><div><p className="text-xs text-white/40">LIVE OPPORTUNITIES</p><p className="mt-1 text-xl font-medium">Good morning, freelancer <span className="text-[#8190ff]">✦</span></p></div><div className="flex items-center gap-2 rounded-lg border border-orange-400/20 bg-orange-400/10 px-3 py-2 text-sm text-orange-200"><Flame className="size-4 fill-current"/> 12 day streak</div></div><div className="grid gap-3 md:grid-cols-3">{jobs.slice(0, 3).map((job, i) => <JobCard key={job.title} job={job} index={i} onClick={() => onNavigate('dashboard')} />)}</div></div></div></section><section className="mx-auto max-w-7xl px-5 py-12 md:px-10"><div className="mb-5 flex items-end justify-between"><div><p className="eyebrow">Everything in sync</p><h2 className="mt-2 text-3xl font-medium tracking-tight">Less searching. More winning.</h2></div><p className="hidden max-w-xs text-right text-sm leading-6 text-white/40 md:block">One calm workspace for the chaos of freelance marketplaces.</p></div><div className="grid gap-4 md:grid-cols-3"><FeatureCard icon={<Target />} title="Find your fit" text="Smart matching highlights projects that align with your skills and goals."/><FeatureCard icon={<Bell />} title="Never miss a brief" text="Fresh listings arrive in real time, filtered exactly how you like them."/><FeatureCard icon={<Sparkles />} title="Bid with confidence" text="Turn a blank page into a thoughtful, personalized proposal in seconds."/></div></section><section className="border-y border-white/[.06] py-8"><div className="marquee flex w-max gap-14 px-8">{[...platforms, ...platforms].map((p, i) => <span key={i} className="flex items-center gap-3 text-sm font-medium text-white/35"><span className="size-2 rounded-full" style={{ background: p.color }}/>{p.name}</span>)}</div></section></Shell>
