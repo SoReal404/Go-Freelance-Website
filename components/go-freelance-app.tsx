@@ -9,18 +9,14 @@ import { safeNext } from '@/lib/safe-next'
 
 const platforms = [
   { name: 'Freelancer.com', short: 'Freelancer', color: '#39B7E8', status: 'LIVE' },
-  { name: 'Upwork', short: 'Upwork', color: '#14A800', status: 'LIVE' },
   { name: 'Mostaql', short: 'Mostaql', color: '#FF7A00', status: 'LIVE' },
-  { name: 'Khamsat', short: 'Khamsat', color: '#C23BE0', status: 'DELAYED' },
   { name: 'Nafezly', short: 'Nafezly', color: '#2BD9A3', status: 'LIVE' },
   { name: 'PeoplePerHour', short: 'PeoplePerHour', color: '#FF4D6D', status: 'DOWN' },
 ]
 const jobs = [
-  { platform: 'Upwork', title: 'Senior Next.js engineer for a fintech dashboard', budget: '$1,200 – $1,800', time: '2m ago', skills: ['Next.js', 'TypeScript', 'Postgres'], match: 96, desc: 'We are looking for a senior frontend engineer to build a refined analytics dashboard for our growing fintech product.' },
   { platform: 'Mostaql', title: 'تصميم هوية بصرية كاملة لشركة تقنية ناشئة', budget: '$500 – $800', time: '6m ago', skills: ['Branding', 'Figma', 'Arabic'], match: 82, desc: 'نبحث عن مصمم موهوب لبناء هوية بصرية عصرية ومتناسقة لشركة تقنية ناشئة.' },
   { platform: 'Freelancer.com', title: 'Automate our lead pipeline with n8n + HubSpot', budget: '$350 fixed', time: '11m ago', skills: ['n8n', 'Automation', 'APIs'], match: 91, desc: 'Connect our lead sources, CRM and notifications into one resilient automation flow.' },
   { platform: 'Nafezly', title: 'Mobile app UI screens in Figma', budget: '$200 – $400', time: '18m ago', skills: ['UI/UX', 'Figma', 'Mobile'], match: 78, desc: 'Polish 14 mobile screens and create a simple component library for handoff.' },
-  { platform: 'Khamsat', title: 'Write landing page copy that converts', budget: '$120 fixed', time: '24m ago', skills: ['Copywriting', 'SaaS', 'SEO'], match: 71, desc: 'Rewrite our landing page with a crisp, benefit-led narrative for B2B buyers.' },
   { platform: 'PeoplePerHour', title: 'React dashboard performance audit', budget: '$600 fixed', time: '31m ago', skills: ['React', 'Performance', 'Vite'], match: 88, desc: 'Audit our React app and recommend practical improvements to loading and interaction speed.' },
 ]
 const categories = ['Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic & Logo Design', 'Writing & Translation', 'Digital Marketing', 'Video & Animation', 'Data & AI/ML', 'Virtual Assistant / Admin Support', 'Business & Consulting', 'Audio & Music Production', 'Photography', 'Engineering & CAD', 'Legal Services', 'Finance & Accounting', 'Customer Support', 'Other']
@@ -32,6 +28,7 @@ function Logo({ compact = false }: { compact?: boolean }) {
 function Shell({ children, onNavigate }: { children: React.ReactNode; onNavigate: (p: string) => void }) {
   const supabase = createClient()
   const [identity, setIdentity] = useState<{ initials: string; label: string } | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   useEffect(() => {
     let mounted = true
     supabase.auth.getUser().then(({ data }) => {
@@ -49,18 +46,36 @@ function Shell({ children, onNavigate }: { children: React.ReactNode; onNavigate
         <div className="aurora aurora-one"/>
         <div className="aurora aurora-two"/>
       </div>
-      <header className="relative z-20 flex h-20 items-center justify-between border-b border-white/[.07] px-5 md:px-10">
+      <header className="relative z-20 flex min-h-16 flex-wrap items-center justify-between gap-y-3 border-b border-white/[.07] px-4 py-3 sm:px-5 md:h-20 md:px-10 md:py-0">
         <button onClick={() => onNavigate('landing')} aria-label="GO Freelance home"><Logo /></button>
         <nav className="hidden items-center gap-7 text-sm text-white/55 md:flex">
           <button onClick={() => onNavigate('dashboard')} className="hover:text-white">Dashboard</button>
           <button onClick={() => onNavigate('bid')} className="hover:text-white">AI Bid Maker</button>
           <button onClick={() => onNavigate('pricing')} className="hover:text-white">Pricing</button>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {identity ? <button onClick={() => onNavigate('profile')} className="hidden items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm text-white/70 hover:border-white/25 md:flex"><span className="grid size-6 place-items-center rounded-full bg-[#25336e] text-[10px]">{identity.initials}</span> {identity.label}</button> : <button onClick={() => onNavigate('login')} className="hidden text-sm text-white/55 hover:text-white md:block">Sign in</button>}
           {identity && <button onClick={signOut} className="hidden text-sm text-white/45 hover:text-white md:block">Sign out</button>}
-          <Button onClick={() => onNavigate(identity ? 'dashboard' : 'signup')} className="bg-[#2541FF] text-white hover:bg-[#3651ff]">{identity ? 'Open dashboard' : 'Create account'} <ArrowRight data-icon="inline-end" /></Button>
+          <Button onClick={() => onNavigate(identity ? 'dashboard' : 'signup')} className="h-9 bg-[#2541FF] px-3 text-xs text-white hover:bg-[#3651ff] sm:h-10 sm:px-4 sm:text-sm"><span className="md:hidden">{identity ? 'Dashboard' : 'Join free'}</span><span className="hidden md:inline">{identity ? 'Open dashboard' : 'Create account'}</span><ArrowRight data-icon="inline-end" /></Button>
+          <button
+            type="button"
+            className="grid size-9 place-items-center rounded-lg border border-white/10 text-white md:hidden"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+          </button>
         </div>
+        {mobileMenuOpen && <nav aria-label="Mobile navigation" className="flex w-full flex-col gap-1 border-t border-white/[.07] pt-2 text-sm text-white/65 md:hidden">
+          <button onClick={() => { setMobileMenuOpen(false); onNavigate('dashboard') }} className="rounded-lg px-3 py-3 text-left hover:bg-white/[.06] hover:text-white">Dashboard</button>
+          <button onClick={() => { setMobileMenuOpen(false); onNavigate('bid') }} className="rounded-lg px-3 py-3 text-left hover:bg-white/[.06] hover:text-white">AI Bid Maker</button>
+          <button onClick={() => { setMobileMenuOpen(false); onNavigate('pricing') }} className="rounded-lg px-3 py-3 text-left hover:bg-white/[.06] hover:text-white">Pricing</button>
+          {identity ? <>
+            <button onClick={() => { setMobileMenuOpen(false); onNavigate('profile') }} className="rounded-lg px-3 py-3 text-left hover:bg-white/[.06] hover:text-white">Profile · {identity.label}</button>
+            <button onClick={signOut} className="rounded-lg px-3 py-3 text-left hover:bg-white/[.06] hover:text-white">Sign out</button>
+          </> : <button onClick={() => { setMobileMenuOpen(false); onNavigate('login') }} className="rounded-lg px-3 py-3 text-left hover:bg-white/[.06] hover:text-white">Sign in</button>}
+        </nav>}
       </header>
       <main className="relative z-10 flex-1">{children}</main>
       <footer className="relative z-10 mt-auto border-t border-white/[.07] px-5 py-6 md:px-10">

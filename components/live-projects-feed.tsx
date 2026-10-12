@@ -617,7 +617,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
             return (
               <div
                 key={project.id}
-                className={`group relative flex flex-col justify-between rounded-2xl border bg-[#0a0c16]/90 p-5 transition-all duration-300 hover:z-20 hover:scale-[1.035] hover:shadow-[0_18px_50px_rgba(37,65,255,.2)] focus-within:z-20 focus-within:scale-[1.02] focus-within:shadow-[0_18px_50px_rgba(37,65,255,.2)] ${meta.border} ${meta.glow} ${newProjectIds.has(project.id) ? 'project-enter' : ''}`}
+                className={`group relative flex min-w-0 flex-col justify-between rounded-2xl border bg-[#0a0c16]/90 p-4 transition-all duration-300 sm:p-5 md:hover:z-20 md:hover:scale-[1.035] md:hover:shadow-[0_18px_50px_rgba(37,65,255,.2)] md:focus-within:z-20 md:focus-within:scale-[1.02] md:focus-within:shadow-[0_18px_50px_rgba(37,65,255,.2)] ${meta.border} ${meta.glow} ${newProjectIds.has(project.id) ? 'project-enter' : ''}`}
               >
                 <div>
                   {/* Top Bar */}
@@ -640,12 +640,12 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
                   </div>
 
                   {/* Title */}
-                  <h3 className="mt-3 line-clamp-2 text-base font-medium leading-snug text-white group-hover:line-clamp-none group-focus-within:line-clamp-none">
+                  <h3 className="mobile-project-title mt-3 line-clamp-2 text-base font-medium leading-snug text-white group-hover:line-clamp-none group-focus-within:line-clamp-none">
                     {highlightMatches(project.title, search)}
                   </h3>
 
                   {/* Description snippet */}
-                  <p className="mt-2.5 line-clamp-3 text-xs leading-relaxed text-white/50 group-hover:line-clamp-none group-focus-within:line-clamp-none">
+                  <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-white/50">
                     {highlightMatches(project.description || project.listing_desc || 'No description provided.', search)}
                   </p>
 
@@ -660,7 +660,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
                           <span
                             key={skill}
                             className={`inline-block rounded-md px-2 py-1 text-[11px] transition-all duration-300 ${
-                              index >= 4 ? 'max-h-0 scale-95 overflow-hidden p-0 opacity-0 group-hover:max-h-40 group-hover:scale-100 group-hover:px-2 group-hover:py-1 group-hover:opacity-100 group-focus-within:max-h-40 group-focus-within:scale-100 group-focus-within:px-2 group-focus-within:py-1 group-focus-within:opacity-100' : ''
+                              index >= 4 ? 'inline-block md:hidden md:group-hover:inline-block md:group-focus-within:inline-block' : ''
                             } ${isMatch ? 'bg-[#2541FF]/30 font-medium text-[#b5c5ff]' : 'bg-white/[.05] text-white/60'}`}
                           >
                             {highlightMatches(skill, search)}
@@ -668,7 +668,7 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
                         )
                       })}
                       {project.skills.length > 4 && (
-                        <span className="rounded-md bg-white/[.04] px-1.5 py-1 text-[10px] text-white/35 group-hover:hidden group-focus-within:hidden">
+                        <span className="hidden rounded-md bg-white/[.04] px-1.5 py-1 text-[10px] text-white/35 md:inline-block md:group-hover:hidden md:group-focus-within:hidden">
                           +{project.skills.length - 4}
                         </span>
                       )}
