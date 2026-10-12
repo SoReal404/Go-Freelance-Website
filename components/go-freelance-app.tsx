@@ -80,7 +80,71 @@ function Shell({ children, onNavigate }: { children: React.ReactNode; onNavigate
   )
 }
 function Landing({ onNavigate }: { onNavigate: (p: string) => void }) {
-  return <Shell onNavigate={onNavigate}><section className="mx-auto max-w-7xl px-5 pb-20 pt-20 md:px-10 md:pt-28"><div className="mx-auto max-w-4xl text-center"><div className="reveal mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-[#5268ff]/30 bg-[#1b255d]/30 px-4 py-2 text-xs text-[#aeb8ff]"><span className="size-1.5 rounded-full bg-[#6e80ff] shadow-[0_0_10px_#6e80ff]"/>Live freelance intelligence, finally in one place</div><h1 className="reveal reveal-delay-1 text-balance text-5xl font-semibold leading-[1.02] tracking-[-.06em] md:text-8xl">Your next great<br/><span className="text-gradient">freelance project</span><br/>is already live.</h1><p className="reveal reveal-delay-2 mx-auto mt-7 max-w-xl text-base leading-7 text-white/50 md:text-lg">GO Freelance watches the platforms you care about and brings the right opportunities to you — before everyone else sees them.</p><div className="reveal reveal-delay-3 mt-9 flex flex-col justify-center gap-3 sm:flex-row"><Button onClick={() => onNavigate('signup')} size="lg" className="h-12 bg-[#2541FF] px-6 text-white shadow-[0_0_35px_rgba(37,65,255,.3)] hover:bg-[#3651ff]">Start for free <ArrowRight data-icon="inline-end" /></Button><Button onClick={() => onNavigate('dashboard')} size="lg" variant="outline" className="h-12 border-white/15 bg-white/[.03] px-6 text-white hover:bg-white/[.08]">Preview dashboard</Button></div></div><div className="reveal reveal-delay-3 relative mx-auto mt-20 max-w-5xl rounded-2xl border border-white/10 bg-[#0b0d18]/90 p-2 shadow-[0_30px_100px_rgba(37,65,255,.18)]"><div className="rounded-xl border border-white/[.06] bg-[#080a12] p-4 md:p-6"><div className="mb-5 flex items-center justify-between"><div><p className="text-xs text-white/40">LIVE OPPORTUNITIES</p><p className="mt-1 text-xl font-medium">Good morning, freelancer <span className="text-[#8190ff]">✦</span></p></div><div className="flex items-center gap-2 rounded-lg border border-orange-400/20 bg-orange-400/10 px-3 py-2 text-sm text-orange-200"><Flame className="size-4 fill-current"/> 12 day streak</div></div><div className="grid gap-3 md:grid-cols-3">{jobs.slice(0, 3).map((job, i) => <JobCard key={job.title} job={job} index={i} onClick={() => onNavigate('dashboard')} />)}</div></div></div></section><section className="mx-auto max-w-7xl px-5 py-12 md:px-10"><div className="mb-5 flex items-end justify-between"><div><p className="eyebrow">Everything in sync</p><h2 className="mt-2 text-3xl font-medium tracking-tight">Less searching. More winning.</h2></div><p className="hidden max-w-xs text-right text-sm leading-6 text-white/40 md:block">One calm workspace for the chaos of freelance marketplaces.</p></div><div className="grid gap-4 md:grid-cols-3"><FeatureCard icon={<Target />} title="Find your fit" text="Smart matching highlights projects that align with your skills and goals."/><FeatureCard icon={<Bell />} title="Never miss a brief" text="Fresh listings arrive in real time, filtered exactly how you like them."/><FeatureCard icon={<Sparkles />} title="Bid with confidence" text="Turn a blank page into a thoughtful, personalized proposal in seconds."/></div></section><section className="border-y border-white/[.06] py-8"><div className="marquee flex w-max gap-14 px-8">{[...platforms, ...platforms].map((p, i) => <span key={i} className="flex items-center gap-3 text-sm font-medium text-white/35"><span className="size-2 rounded-full" style={{ background: p.color }}/>{p.name}</span>)}</div></section></Shell>
+  return (
+    <Shell onNavigate={onNavigate}>
+      <section className="mx-auto max-w-7xl px-5 pb-20 pt-20 md:px-10 md:pt-28">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="reveal mx-auto mb-7 inline-flex items-center gap-2 rounded-full border border-[#5268ff]/30 bg-[#1b255d]/30 px-4 py-2 text-xs text-[#aeb8ff]">
+            <span className="size-1.5 rounded-full bg-[#6e80ff] shadow-[0_0_10px_#6e80ff]" />
+            Live freelance intelligence, finally in one place
+          </div>
+          <h1 className="reveal reveal-delay-1 text-balance text-5xl font-semibold leading-[1.02] tracking-[-.06em] md:text-8xl">
+            Your next great<br /><span className="text-gradient">freelance project</span><br />is already live.
+          </h1>
+          <p className="reveal reveal-delay-2 mx-auto mt-7 max-w-xl text-base leading-7 text-white/50 md:text-lg">
+            GO Freelance watches the platforms you care about and brings the right opportunities to you — before everyone else sees them.
+          </p>
+          <div className="reveal reveal-delay-3 mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button onClick={() => onNavigate('signup')} size="lg" className="h-12 bg-[#2541FF] px-6 text-white shadow-[0_0_35px_rgba(37,65,255,.3)] hover:bg-[#3651ff]">
+              Start for free <ArrowRight data-icon="inline-end" />
+            </Button>
+          </div>
+        </div>
+        <div className="reveal reveal-delay-3 relative mx-auto mt-20 max-w-5xl rounded-2xl border border-white/10 bg-[#0b0d18]/90 p-2 shadow-[0_30px_100px_rgba(37,65,255,.18)]">
+          <div className="rounded-xl border border-white/[.06] bg-[#080a12] p-4 md:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-white/40">LIVE OPPORTUNITIES</p>
+                <p className="mt-1 text-xl font-medium">Good morning, freelancer <span className="text-[#8190ff]">✦</span></p>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border border-orange-400/20 bg-orange-400/10 px-3 py-2 text-sm text-orange-200">
+                <Flame className="size-4 fill-current" /> 12 day streak
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {jobs.slice(0, 3).map((job, index) => (
+                <JobCard key={job.title} job={job} index={index} onClick={() => onNavigate('dashboard')} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="mx-auto max-w-7xl px-5 py-12 md:px-10">
+        <div className="mb-5 flex items-end justify-between">
+          <div>
+            <p className="eyebrow">Everything in sync</p>
+            <h2 className="mt-2 text-3xl font-medium tracking-tight">Less searching. More winning.</h2>
+          </div>
+          <p className="hidden max-w-xs text-right text-sm leading-6 text-white/40 md:block">One calm workspace for the chaos of freelance marketplaces.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <FeatureCard icon={<Target />} title="Find your fit" text="Smart matching highlights projects that align with your skills and goals." />
+          <FeatureCard icon={<Bell />} title="Never miss a brief" text="Fresh listings arrive in real time, filtered exactly how you like them." />
+          <FeatureCard icon={<Sparkles />} title="Bid with confidence" text="Turn a blank page into a thoughtful, personalized proposal in seconds." />
+        </div>
+      </section>
+      <section className="border-y border-white/[.06] py-8">
+        <div className="marquee flex w-max gap-14 px-8">
+          {[...platforms, ...platforms].map((platform, index) => (
+            <span key={index} className="flex items-center gap-3 text-sm font-medium text-white/35">
+              <span className="size-2 rounded-full" style={{ background: platform.color }} />
+              {platform.name}
+            </span>
+          ))}
+        </div>
+      </section>
+    </Shell>
+  )
 }
 function FeatureCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) { return <div className="spotlight rounded-2xl border border-white/[.08] bg-white/[.025] p-6"><div className="mb-10 grid size-10 place-items-center rounded-xl bg-[#2541FF]/15 text-[#8290ff]">{icon}</div><h3 className="text-lg font-medium">{title}</h3><p className="mt-2 text-sm leading-6 text-white/45">{text}</p></div> }
 function JobCard({ job, index = 0, onClick, isGuest = false }: { job: typeof jobs[number]; index?: number; onClick?: () => void; isGuest?: boolean }) { const p = platforms.find(x => x.short === job.platform || x.name === job.platform)!; return <button onClick={onClick} className={`job-card reveal text-left reveal-delay-${Math.min(index + 1, 3)}`}><div className="flex items-start justify-between gap-3"><span className="rounded-md px-2 py-1 text-[10px] font-semibold" style={{ color: p.color, background: `${p.color}18` }}>{job.platform}</span><span className="flex items-center gap-1 text-[10px] text-white/35"><Clock3 className="size-3"/>{job.time}</span></div><h3 className={`mt-4 min-h-12 text-sm font-medium leading-5 text-white/90 ${isGuest ? 'blur-[5px] select-none' : ''}`} aria-hidden={isGuest}>{job.title}</h3><div className="mt-4 flex flex-wrap gap-1.5">{job.skills.map(s => <span key={s} className="rounded-md bg-white/[.06] px-2 py-1 text-[10px] text-white/45">{s}</span>)}</div><div className="mt-5 flex items-end justify-between"><div><p className="text-[10px] text-white/35">EST. BUDGET</p><p className="mt-1 text-sm font-medium">{job.budget}</p></div><span className="rounded-full border border-[#2bd9a3]/20 bg-[#2bd9a3]/10 px-2 py-1 text-[10px] text-[#65e2be]">{job.match}% match</span></div></button> }
