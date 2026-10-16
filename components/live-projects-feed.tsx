@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Search,
   ExternalLink,
@@ -9,7 +10,6 @@ import {
   DollarSign,
   Filter,
   CheckCircle2,
-  Lock,
   Flame,
   Globe,
   RefreshCw,
@@ -167,6 +167,7 @@ function formatBudget(p: LiveProject): string {
 }
 
 export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] }) {
+  const router = useRouter()
   const supabase = createClient()
   const [projects, setProjects] = useState<LiveProject[]>([])
   const [loading, setLoading] = useState(true)
@@ -404,6 +405,21 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
       setSavedProjectIds(nextIds)
     }
     setBookmarkBusy(false)
+  }
+
+  const createBidForProject = (project: LiveProject) => {
+    try {
+      window.sessionStorage.setItem('go-freelance:pending-bid-project', JSON.stringify({
+        title: project.title,
+        description: project.description || project.listing_desc || '',
+        skills: project.skills ?? [],
+      }))
+    } catch {
+      setBookmarkError('Could not open the AI Bid Maker. Please allow session storage and try again.')
+      return
+    }
+
+    router.push('/bid')
   }
 
   return (
@@ -709,12 +725,13 @@ export function LiveProjectsFeed({ userSkills = [] }: { userSkills?: string[] })
                       <ExternalLink className="size-3" />
                     </a>
                     <button
-                      disabled
-                      title="AI Bid Maker is coming soon!"
-                      className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-white/10 bg-white/[.04] px-3 py-1.5 text-xs font-medium text-white/40 opacity-75"
+                      type="button"
+                      onClick={() => createBidForProject(project)}
+                      aria-label={`Generate an AI bid for ${project.title}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#6e80ff]/25 bg-[#2541FF]/10 px-3 py-1.5 text-xs font-medium text-[#b5c5ff] transition hover:border-[#6e80ff]/50 hover:bg-[#2541FF]/20"
                     >
-                      <Lock className="size-3 text-white/40" />
-                      <span>AI Bid (Soon)</span>
+                      <Sparkles className="size-3" />
+                      <span>AI Bid</span>
                     </button>
                   </div>
                 </div>

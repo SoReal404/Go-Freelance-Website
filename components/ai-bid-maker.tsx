@@ -52,6 +52,45 @@ export function AIBidMaker({ onNavigate }: AIBidMakerProps) {
     return () => { mounted = false }
   }, [])
 
+  useEffect(() => {
+    const storageKey = 'go-freelance:pending-bid-project'
+    let pendingProject: string | null
+    try {
+      pendingProject = window.sessionStorage.getItem(storageKey)
+      if (pendingProject) window.sessionStorage.removeItem(storageKey)
+    } catch {
+      setError('Could not load the selected project. Enter its details manually and try again.')
+      return
+    }
+    if (!pendingProject) return
+
+    try {
+      const value: unknown = JSON.parse(pendingProject)
+      if (
+        typeof value !== 'object'
+        || value === null
+        || !('title' in value)
+        || typeof value.title !== 'string'
+        || !('description' in value)
+        || typeof value.description !== 'string'
+        || !('skills' in value)
+        || !Array.isArray(value.skills)
+        || !value.skills.every((skill) => typeof skill === 'string')
+      ) {
+        setError('Could not read the selected project details. Enter them manually and try again.')
+        return
+      }
+
+      setTitle(value.title)
+      setDescription(value.description)
+      setSkills(value.skills.join(', '))
+      setProposal('')
+      setError('')
+    } catch {
+      setError('Could not read the selected project details. Enter them manually and try again.')
+    }
+  }, [])
+
   const generateBid = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setBusy(true)
