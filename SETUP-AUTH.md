@@ -35,3 +35,10 @@ Publish the consent screen (move from Testing to In production) or only test use
 
 ## 6. Freelancer profiles and activity
 The application saves each freelancer's onboarding details, specialized profiles, skills, projects, and UTC activity dates in that user's Supabase Auth user metadata. No additional database tables or SQL setup are required. A dashboard visit records one activity date per day; the dashboard and profile calculate streaks from that saved history.
+
+## 7. Gemini AI bid generation
+Create a Gemini API key in [Google AI Studio](https://aistudio.google.com/app/apikey), then add it to the root `.env.local` file:
+
+    GOOGLE_GEMINI_API_KEY=your-gemini-api-key
+
+Keep this key server-side: do not prefix it with `NEXT_PUBLIC_` or commit `.env.local`. Restart `pnpm dev` after adding it. The bid maker sends the project title, complete description, skills, selected language, and notes to Gemini. The server loads the signed-in user's name and all saved profile descriptions, skills, and portfolio project details from Supabase before making the request.
