@@ -30,6 +30,14 @@ function parseBidRequest(value: unknown): BidRequest | null {
   }
 }
 
+function getGeminiErrorMessage(result: unknown, apiKey: string): string {
+  if (!isRecord(result) || !isRecord(result.error) || typeof result.error.message !== 'string') {
+    return 'Gemini returned no error details.'
+  }
+
+  return result.error.message.replaceAll(apiKey, '[redacted]').slice(0, 500)
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -125,9 +133,32 @@ export async function POST(request: Request) {
   }
 
   if (!geminiResponse.ok) {
-    console.error('Gemini bid generation failed with status:', geminiResponse.status)
+    const geminiError = getGeminiErrorMessage(result, apiKey)
+    console.error(`Gemini bid generation failed (${geminiResponse.status}):`, geminiError)
+    let errorMessage: string
+
+    switch (geminiResponse.status) {
+      case 400:
+        errorMessage = `Gemini rejected the request: ${geminiError} Check the project details and try again.`
+        break
+      case 401:
+        errorMessage = `Gemini rejected the API key: ${geminiError} Verify GOOGLE_GEMINI_API_KEY in Vercel, then redeploy.`
+        break
+      case 402:
+        errorMessage = `Gemini billing needs attention: ${geminiError} Add Gemini API credit or enable billing for the Google Cloud project.`
+        break
+      case 403:
+        errorMessage = `Gemini denied access: ${geminiError} In Google AI Studio, check the key's project and restrict the key to the Gemini API.`
+        break
+      case 429:
+        errorMessage = `Gemini quota or rate limit reached: ${geminiError} Check the model's quota and billing in Google AI Studio, then try again later.`
+        break
+      default:
+        errorMessage = `Gemini returned HTTP ${geminiResponse.status}: ${geminiError}`
+    }
+
     return Response.json({
-      error: 'Gemini could not generate the bid. Check your API key, available credit, and API quota.',
+      error: errorMessage,
     }, { status: 502 })
   }
 
